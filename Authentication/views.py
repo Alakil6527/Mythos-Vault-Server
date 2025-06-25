@@ -13,7 +13,17 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            return Response({'message': 'User registered successfully.'}, status=status.HTTP_201_CREATED)
+
+            # Generate tokens manually
+            refresh = RefreshToken.for_user(user)
+            access = refresh.access_token
+
+            return Response({
+                'message': 'User registered successfully.',
+                'access': str(access),
+                'refresh': str(refresh)
+            }, status=status.HTTP_201_CREATED)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class EmailLoginView(TokenObtainPairView):
